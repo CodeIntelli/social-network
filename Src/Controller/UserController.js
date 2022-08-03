@@ -22,13 +22,14 @@ const UserController = {
         );
       }
       const file = req.file;
-      const result = await AWSUpload.uploadFile(file)
+      const folderName = "/Profile"
+      const result = await AWSUpload.uploadFile(folderName, file)
       const fileSize = await AWSUpload.fileSizeConversion(file.size)
-      console.log(file.size)
-      user.profile.fileName = file.originalname
-      user.profile.fileSize = fileSize;
-      user.profile.public_id = result.key
-      user.profile.url = result.Location
+     
+      user.profile_img.fileName = file.originalname
+      user.profile_img.fileSize = fileSize;
+      user.profile_img.public_id = result.Key
+      user.profile_img.url = result.Location
       user.save();
       SuccessHandler(200, user, "User Profile Uploaded Successfully", res);
     } catch (error) {
@@ -36,6 +37,29 @@ const UserController = {
     }
   },
 
+  async uploadBackgroundFile(req, res, next) {
+    try {
+      const user = await UserModel.findById(req.user.id);
+      if (!user) {
+        return next(
+          new ErrorHandler(`User does not exist with Id: ${req.body.id}`, 404)
+        );
+      }
+      const file = req.file;
+      const folderName = "/Backgroundpost"
+      const result = await AWSUpload.uploadFile(folderName, file)
+      const fileSize = await AWSUpload.fileSizeConversion(file.size)
+      console.log(file.size)
+      user.background_img.fileName = file.originalname
+      user.background_img.fileSize = fileSize;
+      user.background_img.public_id = result.Key
+      user.background_img.url = result.Location
+      user.save();
+      SuccessHandler(200, user, "Background file Uploaded Successfully", res);
+    } catch (error) {
+      return next(ErrorHandler.serverError(error));
+    }
+  },
   // [ + ] GET USER DETAILS
   async userProfile(req, res, next) {
     try {
@@ -81,7 +105,7 @@ const UserController = {
         newPassword: Joi.string()
           .pattern(new RegExp("^[a-zA-Z0-9]{3,30}$"))
           .required(),
-        confirmPassword: Joi.ref("password"),
+        confirmPassword: Joi.ref("newPassword"),
       });
       const { error } = UserValidation.validate(req.body);
       if (error) {
@@ -99,7 +123,7 @@ const UserController = {
       }
       const user = await UserModel.findById(req.user.id).select("+password");
       let oldPasswordTest = await bcrypt.compare(
-        req.body.newPassword,
+        req.body.oldPassword,
         user.password
       );
       if (!oldPasswordTest) {

@@ -8,6 +8,7 @@ AuthenticationRoutes.post("/register", AuthController.registerUser);
 AuthenticationRoutes.post("/users/verify/:id", AuthController.verifyEmail);
 
 AuthenticationRoutes.post("/login", AuthController.login);
+AuthenticationRoutes.post("/signinwithGoogle", AuthController.login);
 
 AuthenticationRoutes.post("/resendVerifyEmail/:id", AuthController.resendVerifyEmail);
 

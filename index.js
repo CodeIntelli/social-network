@@ -15,7 +15,6 @@ app.use(
   })
 );
 import consola from "consola";
-import cloudinary from "cloudinary";
 import bodyParser from "body-parser";
 
 app.use(bodyParser.urlencoded({ extended: true }));

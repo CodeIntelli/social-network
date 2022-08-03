@@ -8,11 +8,12 @@ import {
 
 // [ + ]After Login this url is used for user
 UserRoutes.get("/profile", AuthenticationMiddleware, UserController.userProfile);
-UserRoutes.get("/getprofile", AuthenticationMiddleware, UserController.getProfile);
 
 UserRoutes.put("/changePassword", AuthenticationMiddleware, UserController.changePassword);
 
 UserRoutes.post("/profile_image", AuthenticationMiddleware, Upload.single("profile_img"), UserController.uploadProfileImage);
+UserRoutes.post("/background_file", AuthenticationMiddleware, Upload.single("background_img"), UserController.uploadBackgroundFile);
+UserRoutes.get("/getprofile", AuthenticationMiddleware, UserController.getProfile);
 
 UserRoutes.put("/edit_profile/:id", AuthenticationMiddleware, Upload.single("profile_img"), UserController.editUserprofile);
 
