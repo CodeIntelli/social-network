@@ -1,4 +1,5 @@
 import { UserModel } from "../Models";
+import worldMapData from "city-state-country"
 import Joi from "joi";
 import {
   AWSUpload,
@@ -18,14 +19,15 @@ const UserController = {
       const user = await UserModel.findById(req.user.id);
       if (!user) {
         return next(
-          new ErrorHandler(`User does not exist with Id: ${req.body.id}`, 404)
+          new ErrorHandler(`User does not exist with Id: ${req.user.id}`, 404)
         );
       }
       const file = req.file;
+      console.log(file);
       const folderName = "/Profile"
       const result = await AWSUpload.uploadFile(folderName, file)
       const fileSize = await AWSUpload.fileSizeConversion(file.size)
-     
+
       user.profile_img.fileName = file.originalname
       user.profile_img.fileSize = fileSize;
       user.profile_img.public_id = result.Key
@@ -187,7 +189,10 @@ const UserController = {
         email: Joi.string().email().trim().messages({
           "string.base": `User Email should be a type of 'text'`,
         }),
-        profile_img: Joi.string(),
+        about_me: Joi.string().trim().min(20).max(150).messages({
+          "string.base": `About me should be a type of 'text'`,
+          "string.min": `about me should have a minimum length of {20}`,
+        }),
       });
       const { error } = UserValidation.validate(req.body);
       if (error) {
@@ -201,10 +206,18 @@ const UserController = {
           return next(ErrorHandler.unAuthorized("This email is already taken"));
         }
       }
+      const country = worldMapData.searchCountry('In');
+      const state = worldMapData.getAllStatesFromCountry('India');
+      const city = worldMapData.getAllCitiesFromState('Maharashtra');
       const newUserData = {
         name: req.body.name,
         email: req.body.email,
+        aboutme: req.body.about_me,
+        country: country.name,
+        state: state.name,
+        city: city.name
       };
+      console.log(newUserData);
       if (req.body.profile_img !== undefined && req.body.profile_img !== "") {
         const user = await UserModel.findById(req.user.id);
         const imageId = user.profile_img.public_id;

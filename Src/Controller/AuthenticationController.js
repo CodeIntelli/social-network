@@ -47,8 +47,8 @@ const AuthController = {
             }
             let { name, email, password, confirmPassword, userLocation } = req.body;
 
-            if (req.body.password) {
-                if (req.body.password !== req.body.confirmPassword) {
+            if (password) {
+                if (password !== confirmPassword) {
                     return next(
                         ErrorHandler.unAuthorized(
                             "Confirm Password & Password Must Be Same"
@@ -58,7 +58,7 @@ const AuthController = {
             }
 
             try {
-                const exist = await UserModel.exists({ email: req.body.email });
+                const exist = await UserModel.exists({ email: email });
                 if (exist) {
                     return next(ErrorHandler.alreadyExist("This email is already taken"));
                 }

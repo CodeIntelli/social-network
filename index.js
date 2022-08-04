@@ -2,7 +2,7 @@
 import express from "express";
 const app = express();
 import { PORT } from "./Config/";
-import { AuthenticationRoutes, UserRoutes } from "./Src/Routes";
+import { AuthenticationRoutes, UserRoutes, BlogRoutes } from "./Src/Routes";
 import "./Src/Database";
 import cors from "cors";
 import { ErrorMiddleware } from "./Src/Middleware";
@@ -22,6 +22,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // todo: All Routes Declare Here
 app.use("/api/v1/auth", AuthenticationRoutes);
 app.use("/api/v1/", UserRoutes);
+app.use("/api/v1/", BlogRoutes);
 
 //* Middleware for Error
 app.use(ErrorMiddleware);

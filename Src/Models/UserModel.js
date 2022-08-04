@@ -57,6 +57,15 @@ const UserSchema = new mongoose.Schema({
         "https://res.cloudinary.com/dm3gs2s0h/image/upload/v1650136405/userImage/tzsmxrevyes1xsuyujlk.png",
     },
   },
+  country: {
+    type: String
+  },
+  state: {
+    type: String
+  },
+  city: {
+    type: String,
+  },
   aboutme: {
     type: String,
   },
