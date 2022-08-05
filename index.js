@@ -22,7 +22,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // todo: All Routes Declare Here
 app.use("/api/v1/auth", AuthenticationRoutes);
 app.use("/api/v1/", UserRoutes);
-app.use("/api/v1/", BlogRoutes);
+app.use("/api/v1/blog", BlogRoutes);
 
 //* Middleware for Error
 app.use(ErrorMiddleware);

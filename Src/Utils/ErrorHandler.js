@@ -27,11 +27,14 @@ class ErrorHandler extends Error {
     return new ErrorHandler(message, 401);
   }
 
+  static WrongObject(message) {
+    consola.error(message);
+    return new ErrorHandler(message, 404)
+  }
 
   static fileFormat(message) {
     return new ErrorHandler(message, 415)
   }
-
 
   static serverError(message = "Internal Server Error") {
     consola.error(message);

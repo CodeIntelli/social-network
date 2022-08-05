@@ -112,10 +112,12 @@ const AWSUpload = {
   // },
 
   async removeObj(fileKey) {
-    var params = { Bucket: AWS_BUCKET, Key: `images/${fileKey}` };
-    // @ts-ignore
-    return await s3.deleteObject(params, function (err, data) {
+
+    var params = { Bucket: AWS_BUCKET, Key: `${fileKey}` };
+    // console.log(params)
+    return s3.deleteObject(params, function (err, data) {
       if (err) {
+        // console.log(data)
         console.log(err);
       }
       console.log("success");
