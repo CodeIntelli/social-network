@@ -99,7 +99,7 @@ const BlogController = {
         try {
             const testId = CheckMongoID(req.params.id);
             if (!testId) {
-                return next(ErrorHandler.wrongCredentials("Wrong MongoDB Id"));
+                return next(ErrorHandler.WrongObject("Wrong MongoDB Id"));
             }
 
             const newBlogData = {
@@ -118,7 +118,7 @@ const BlogController = {
                 const fileSize = await AWSUpload.fileSizeConversion(file[0].size)
                 blog.post_img.fileName = file[0].originalname;
                 blog.post_img.fileSize = fileSize;
-                blog.post_img.public_id = result.key
+                blog.post_img.public_id = result.Key
                 blog.post_img.url = result.Location
             }
             if (req.files.cover_img !== undefined && req.files.cover_img !== "") {
@@ -131,7 +131,7 @@ const BlogController = {
                 const fileSize = await AWSUpload.fileSizeConversion(file[0].size)
                 blog.cover_img.fileName = file[0].originalname;
                 blog.cover_img.fileSize = fileSize;
-                blog.cover_img.public_id = result.key
+                blog.cover_img.public_id = result.Key
                 blog.cover_img.url = result.Location
             }
             const blog = await BlogModel.findByIdAndUpdate(req.params.id, newBlogData, {
@@ -170,6 +170,46 @@ const BlogController = {
         } catch (error) {
             res.status(500).json({ success: false, message: error.message });
         }
+    },
+
+    async likeBlog(req, res, next) {
+        try {
+            const Blog = await BlogModel.findByIdAndUpdate(req.body.id,
+                { $push: { likes: req.user._id } },
+                {
+                    new: true,
+                    runValidators: true,
+                    useFindAndModify: false,
+                });
+            res.status(200).json({
+                success: true,
+                Blog,
+            });
+        }
+        catch (error) {
+            return next(ErrorHandler.serverError(error));
+        }
+
+    },
+
+    async unlikeBlog(req, res, next) {
+        try {
+            const Blog = await BlogModel.findByIdAndUpdate(req.body.id,
+                { $pull: { likes: req.user._id } },
+                {
+                    new: true,
+                    runValidators: true,
+                    useFindAndModify: false,
+                });
+            res.status(200).json({
+                success: true,
+                Blog,
+            });
+        }
+        catch (error) {
+            return next(ErrorHandler.serverError(error));
+        }
+
     }
 }
 export default BlogController;
