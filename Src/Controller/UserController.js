@@ -23,7 +23,6 @@ const UserController = {
         );
       }
       const file = req.file;
-      console.log(file);
       const folderName = "/Profile"
       const result = await AWSUpload.uploadFile(folderName, file)
       const fileSize = await AWSUpload.fileSizeConversion(file.size)
@@ -382,6 +381,69 @@ const UserController = {
       return next(ErrorHandler.serverError(error));
     }
   },
+
+
+  async followFriend(req, res, next) {
+    try {
+      const user = await UserModel.findById(req.user.id);
+      if (!user) {
+        return next(
+          new ErrorHandler(`User does not exist with Id: ${req.user.id}`, 404)
+        );
+      }
+      UserModel.findByIdAndUpdate(req.body.followId, {
+        $push: { followers: req.user._id }
+      }, {
+        new: true
+      }, (err, result) => {
+        if (err) {
+          return res.status(422).json({ error: err })
+        }
+        UserModel.findByIdAndUpdate(req.user._id, {
+          $push: { following: req.body.followId }
+
+        }, { new: true }).select("-password").then(result => {
+          res.json(result)
+        }).catch(err => {
+          return res.status(422).json({ error: err })
+        })
+      }
+      )
+    } catch (error) {
+      return next(ErrorHandler.serverError(error));
+    }
+  },
+
+  async unfollowFriend(req, res, next) {
+    try {
+      const user = await UserModel.findById(req.user.id);
+      if (!user) {
+        return next(
+          new ErrorHandler(`User does not exist with Id: ${req.user.id}`, 404)
+        );
+      }
+      UserModel.findByIdAndUpdate(req.body.followId, {
+        $pull: { followers: req.user._id }
+      }, {
+        new: true
+      }, (err, result) => {
+        if (err) {
+          return res.status(422).json({ error: err })
+        }
+        UserModel.findByIdAndUpdate(req.user._id, {
+          $pull: { following: req.body.followId }
+        }, { new: true }).select("-password").then(result => {
+          res.json(result)
+        }).catch(err => {
+          return res.status(422).json({ error: err })
+        })
+      }
+      )
+    } catch (error) {
+      return next(ErrorHandler.serverError(error));
+    }
+  },
+
 };
 
 export default UserController;

@@ -3,6 +3,8 @@ import validator from "validator";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
+const { ObjectId } = mongoose.Schema.Types
+
 import { JWT_EXPIRE, JWT_SECRET } from "../../Config";
 const UserSchema = new mongoose.Schema({
   name: {
@@ -11,18 +13,31 @@ const UserSchema = new mongoose.Schema({
     maxLength: [30, "Name Cannot exceed 30 characters"],
     minLength: [4, "Name Should have more than 4 characters"],
   },
+
   email: {
     type: String,
     required: [true, "Please Enter Your Email"],
     unique: true,
     validate: [validator.isEmail, "Please Enter a valid email"],
   },
+
   password: {
     type: String,
     required: [true, "Please Enter Your Password"],
     minLength: [4, "Password should not be greater than 4 characters"],
     select: false,
   },
+
+  followers: [{
+    type: ObjectId,
+    ref: "User"
+  }],
+
+  following: [{
+    type: ObjectId,
+    ref: "User"
+  }],
+
   profile_img: {
     fileName: {
       type: String,
@@ -40,6 +55,7 @@ const UserSchema = new mongoose.Schema({
         "https://res.cloudinary.com/dm3gs2s0h/image/upload/v1650136405/userImage/tzsmxrevyes1xsuyujlk.png",
     },
   },
+
   background_img: {
     fileName: {
       type: String,
@@ -57,38 +73,48 @@ const UserSchema = new mongoose.Schema({
         "https://res.cloudinary.com/dm3gs2s0h/image/upload/v1650136405/userImage/tzsmxrevyes1xsuyujlk.png",
     },
   },
+
   country: {
     type: String
   },
+
   state: {
     type: String
   },
+
   city: {
     type: String,
   },
+
   aboutme: {
     type: String,
   },
+
   verified: {
     type: Boolean,
     default: false,
   },
+
   createdAt: {
     type: Date,
     default: Date.now,
   },
+
   status: {
     type: String,
     default: "Active",
   },
+
   userIp: {
     type: String,
     default: "0.0.0.0",
   },
+
   userLocation: {
     type: String,
     default: "",
   },
+
   resetPasswordToken: String,
   resetPasswordExpire: Date,
 });

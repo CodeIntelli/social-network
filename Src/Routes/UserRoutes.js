@@ -18,6 +18,8 @@ UserRoutes.get("/getprofile", AuthenticationMiddleware, UserController.getProfil
 UserRoutes.put("/edit_profile/:id", AuthenticationMiddleware, Upload.single("profile_img"), UserController.editUserprofile);
 
 UserRoutes.put("/deactivate", AuthenticationMiddleware, UserController.deactivateAccount);
+UserRoutes.put("/follow", AuthenticationMiddleware, UserController.followFriend);
+UserRoutes.put("/unfollow", AuthenticationMiddleware, UserController.unfollowFriend);
 
 UserRoutes.get("/admin/user", AuthenticationMiddleware, UserController.getAllUserDetails);
 
