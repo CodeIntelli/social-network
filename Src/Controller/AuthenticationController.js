@@ -295,11 +295,11 @@ const AuthController = {
 
     async resendVerifyEmail(req, res, next) {
         try {
-            const testId = CheckMongoID(req.params.id);
+            const testId = CheckMongoID(req.body.id);
             if (!testId) {
                 return next(ErrorHandler.wrongCredentials("Wrong MongoDB Id"));
             }
-            const user = await UserModel.findById(req.params.id);
+            const user = await UserModel.findById(req.body.id);
             if (user.verified) {
                 return next(ErrorHandler.unAuthorized("User Is Already Verified"));
             }

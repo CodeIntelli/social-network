@@ -14,6 +14,7 @@ UserRoutes.put("/changePassword", AuthenticationMiddleware, UserController.chang
 UserRoutes.post("/profile_image", AuthenticationMiddleware, Upload.single("profile_img"), UserController.uploadProfileImage);
 UserRoutes.post("/background_file", AuthenticationMiddleware, Upload.single("background_img"), UserController.uploadBackgroundFile);
 UserRoutes.get("/getprofile", AuthenticationMiddleware, UserController.getProfile);
+UserRoutes.get("/search-user", AuthenticationMiddleware, UserController.search);
 
 UserRoutes.put("/edit_profile/:id", AuthenticationMiddleware, Upload.single("profile_img"), UserController.editUserprofile);
 

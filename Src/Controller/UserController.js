@@ -391,19 +391,27 @@ const UserController = {
           new ErrorHandler(`User does not exist with Id: ${req.user.id}`, 404)
         );
       }
-      UserModel.findByIdAndUpdate(req.body.followId, {
-        $push: { followers: req.user._id }
-      }, {
+
+      const followersUser = {
+        followers: req.user.id
+      }
+
+      const followingUser = {
+        following: req.body.followId
+      }
+      const Follow = UserModel.findByIdAndUpdate(req.body.followId,
+        followersUser, {
         new: true
       }, (err, result) => {
         if (err) {
           return res.status(422).json({ error: err })
         }
-        UserModel.findByIdAndUpdate(req.user._id, {
-          $push: { following: req.body.followId }
-
-        }, { new: true }).select("-password").then(result => {
-          res.json(result)
+        UserModel.findByIdAndUpdate(req.user.id, followingUser, { new: true }).select("-password").then(result => {
+          res.status(200).json({
+            success: true,
+            result,
+            message: "User is Following Successfully",
+          });
         }).catch(err => {
           return res.status(422).json({ error: err })
         })
@@ -422,18 +430,30 @@ const UserController = {
           new ErrorHandler(`User does not exist with Id: ${req.user.id}`, 404)
         );
       }
+      const followersUser = {
+        followers: req.user.id
+      }
+
+      const followingUser = {
+        following: req.body.followId
+      }
+
       UserModel.findByIdAndUpdate(req.body.followId, {
-        $pull: { followers: req.user._id }
+        $pull: followersUser
       }, {
         new: true
       }, (err, result) => {
         if (err) {
           return res.status(422).json({ error: err })
         }
-        UserModel.findByIdAndUpdate(req.user._id, {
-          $pull: { following: req.body.followId }
+        UserModel.findByIdAndUpdate(req.user.id, {
+          $pull: followingUser
         }, { new: true }).select("-password").then(result => {
-          res.json(result)
+          res.status(200).json({
+            success: true,
+            result,
+            message: "User is unfollow Successfully",
+          });
         }).catch(err => {
           return res.status(422).json({ error: err })
         })
@@ -444,6 +464,21 @@ const UserController = {
     }
   },
 
-};
+  async search(req, res) {
+    try {
+      let userPattern = new RegExp("^" + req.body.query)
+      const searchUser = UserModel.find({ email: { $regex: userPattern } }).select("_id email");
+      res.status(200).json({
+        success: true,
+        searchUser,
+        message: "User is unfollow Successfully",
+      });
+    }
+    catch (error) {
+      return next(ErrorHandler.serverError(error));
 
+    }
+
+  }
+}
 export default UserController;

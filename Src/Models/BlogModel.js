@@ -45,10 +45,10 @@ const blogSchema = new mongoose.Schema({
                 "https://res.cloudinary.com/dm3gs2s0h/image/upload/v1650136405/userImage/tzsmxrevyes1xsuyujlk.png",
         },
     },
-    likes: [{ type: ObjectId, ref: "user" }],
+    likes: [{ type: ObjectId, ref: "User" }],
     comments: [{
         text: String,
-        postedBy: { type: ObjectId, ref: "user" }
+        postedBy: { type: ObjectId, ref: "User" }
     }],
     postedBy: {
         type: ObjectId,

@@ -13,7 +13,7 @@ const BlogController = {
             }
 
             const BlogValidation = Joi.object({
-                title: Joi.string().trim().min(2).max(20).messages({
+                title: Joi.string().trim().min(2).max(50).messages({
                     "string.base": `Blog Name should be a type of 'text'`,
                     "string.min": `Blog Name should have a minimum length of {3}`,
                 }).required(),
@@ -34,7 +34,7 @@ const BlogController = {
             const folderPost = "/post"
             const result = await AWSUpload.uploadFile(folderPost, file[0])
             const fileSize = await AWSUpload.fileSizeConversion(file[0].size)
-            console.log(result)
+
             // cover_img
             const file1 = req.files['cover_img']
             const folderCover = "/Backgroundpost"
@@ -44,18 +44,20 @@ const BlogController = {
             const blog = await BlogModel.create({
                 title,
                 body,
+                postedBy: req.user,
+                post_img: {
+                    fileName: file[0].originalname,
+                    fileSize: fileSize,
+                    public_id: result.Key,
+                    url: result.Location
+                },
+                cover_img: {
+                    fileName: file1[0].originalname,
+                    fileSize: fileSize1,
+                    public_id: result1.Key,
+                    url: result1.Location
+                }
             });
-            // post_img
-            blog.post_img.fileName = file[0].originalname
-            blog.post_img.fileSize = fileSize;
-            blog.post_img.public_id = result.Key
-            blog.post_img.url = result.Location
-
-            // cover_img
-            blog.cover_img.fileName = file1[0].originalname
-            blog.cover_img.fileSize = fileSize1;
-            blog.cover_img.public_id = result1.Key
-            blog.cover_img.url = result1.Location
             blog.save();
 
             res.status(201).json({
@@ -95,7 +97,7 @@ const BlogController = {
     },
 
     async editBlog(req, res, next) {
-        debugger
+
         try {
             const testId = CheckMongoID(req.params.id);
             if (!testId) {
@@ -155,16 +157,46 @@ const BlogController = {
         try {
             const Blogs = await BlogModel.find(
                 { __v: 0 },
-                { __v: 0, createdAt: 0 }
-            ).sort({ createdAt: -1 });
+                { __v: 0, createdAt: 0 })
+                .sort('-createdAt').
+                populate("postedBy", "_id name").
+                populate("comments.postedBy", "_id name")
             SuccessHandler(200, Blogs, "Blog Details Display Successfully", res);
         } catch (error) {
             return next(ErrorHandler.serverError(error));
         }
     },
 
+    async getsubBlog(req, res) {
+        try {
+            const user = await UserModel.findById(req.user.id);
+            if (!user) {
+                return next(
+                    new ErrorHandler(`User does not exist with Id: ${req.user.id}`, 404)
+                );
+            }
+            // if postedBy in following
+            const Blogs = await BlogModel.find(
+                { postedBy: { $in: req.user.id } })
+                .populate("postedBy", "_id name")
+                .populate("comments.postedBy", "_id name")
+                .sort('-createdAt')
+            SuccessHandler(200, Blogs, "Blog Details Display following", res);
+
+        }
+        catch (error) {
+            return next(ErrorHandler.serverError(error));
+        }
+    },
+
     async getSingle(req, res) {
         try {
+            const user = await UserModel.findById(req.user.id);
+            if (!user) {
+                return next(
+                    new ErrorHandler(`User does not exist with Id: ${req.user.id}`, 404)
+                );
+            }
             const Blog = await BlogModel.findById(req.params.id);
             SuccessHandler(200, Blog, "BLog Display Successfully", res);
         } catch (error) {
@@ -210,6 +242,41 @@ const BlogController = {
             return next(ErrorHandler.serverError(error));
         }
 
-    }
+    },
+
+    async commentBlog(req, res, next) {
+        try {
+            const user = await UserModel.findById(req.user.id);
+            if (!user) {
+                return next(
+                    new ErrorHandler(`User does not exist with Id: ${req.user.id}`, 404)
+                );
+            }
+            const comment = {
+                comments:
+                {
+                    text: req.body.text,
+                    postedBy: req.user.id
+                }
+            }
+            const Blog = await BlogModel.findByIdAndUpdate(req.body.postId,
+                comment,
+                {
+                    new: true,
+                    runValidators: true,
+                    useFindAndModify: false,
+                })
+                .populate("comments.postedBy", "name")
+            // .populate("comments.postedBy", "_id name");
+            res.status(200).json({
+                success: true,
+                Blog,
+            });
+        }
+        catch (error) {
+            return next(ErrorHandler.serverError(error));
+        }
+
+    },
 }
 export default BlogController;
